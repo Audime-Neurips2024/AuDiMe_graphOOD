@@ -16,7 +16,8 @@ The data will be saved to `XXX/data/`, e.g., `ood-baselines/data/`.
 
 ### DrugOOD
 
-To use DrugOOD datasets, curate the datasets according to [DrugOOD Benchmark repo](https://github.com/tencent-ailab/DrugOOD) based on commit `eeb00b8da7646e1947ca7aec93041052a48bd45e`, After curating the datasets, put the corresponding json files under `XXX/data/DrugOOD/`. 
+- For `ood-baselines/` and `AuDiMe/`, to use DrugOOD datasets, curate the datasets according to [DrugOOD Benchmark repo](https://github.com/tencent-ailab/DrugOOD) based on commit `eeb00b8da7646e1947ca7aec93041052a48bd45e`, After curating the datasets, put the corresponding json files under `XXX/data/DrugOOD/`.
+- For `iMoLD/`, the JSON files can be obtained [here](https://drive.google.com/drive/folders/19EAVkhJg0AgMx7X-bXGOhD4ENLfxJMWC), then Extract the downloaded file and save the contents in `iMoLD/drugood-data-chembl30/`.
 
 
 ### Graph-SST
