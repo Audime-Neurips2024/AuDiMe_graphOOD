@@ -1,1 +1,3 @@
-In this dir, we have provided code examples in `cmd_run.py`. The experimental results will be saved to `results/` with subdir named after different hyperparameters and seeds. For more details about the meaning of the arguments, please refer to [here](https://github.com/HICAI-ZJU/iMoLD).
+In this dir, we have provided code implementing our framework `AuDi`, the code for `AuDiMe` (with meta-learning components) is masked, and will be released if our paper get accepted. Here is a example on how to run our code:
+
+
