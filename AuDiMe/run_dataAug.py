@@ -199,8 +199,8 @@ result_fname += f"_egLayers_{args.edge_gnn_layers}_edgeBudget_{args.edge_budget}
 
 
 # Example usage
-result_dir = os.path.join("ttt_experiments/", result_fname)
-result_dir_top3 = os.path.join("ttt_experiments/top3/", result_fname)
+result_dir = os.path.join("exp_results/", result_fname)
+result_dir_top3 = os.path.join("exp_results/top3/", result_fname)
 
 # if result_dir exists, sys.exit()
 if os.path.exists(result_dir) and not args.debug:

@@ -177,124 +177,13 @@ class Model(BaseModel):
     
 
     def fit_meta_loss(self,dataloader,valid_dloader,test_dloader=None,epochs=10,meta_opt_use_all_params=True):
-        self.epochs_since_improvement=0
-        self.stop_training=False
-        if not meta_opt_use_all_params:
-            self.meta_loss_optimizer = Adam(list(self.dataAug_gnn.parameters())+list(self.edge_linear.parameters())+list(self.meta_loss_head.parameters())+list(self.meta_loss1.parameters())+list(self.meta_loss2.parameters()),lr=self.lr,weight_decay=self.weight_decay)
-        else:
-            self.meta_loss_optimizer = Adam(self.parameters(), lr=self.lr,weight_decay=self.weight_decay)
-
-        state = deepcopy([self.useAutoAug,self.encoder_model.learnable_aug,0,self.edge_uniform_penalty,self.penalty,self.edge_penalty,self.gradMatching_penalty])
-        if self.pe>0:
-            self.fit_erm(dataloader,valid_dloader,test_dloader,epochs=self.pe)
-        self.best_valid_metric = 0.
-        
-        self.useAutoAug,self.encoder_model.learnable_aug,self.epochs_since_improvement,self.edge_uniform_penalty,self.penalty,self.edge_penalty,self.gradMatching_penalty = state
-        for e in range(epochs):
-            if self.stop_training: break
-            print (colored(f'Current Epoch {e} for meta loss learning','red','on_yellow'))
-            total_losses = 0.
-            steps = 0.
-            self.meta_loss_optimizer.zero_grad()
-            for data in dataloader:
-                t_ = self.fit_meta_loss_step(data)
-                if t_==-1: continue
-                step_loss,meta_ce_loss,ssl_loss = t_
-                # tot_loss = meta_ce_loss + self.penalty*ssl_loss.mean()  # no cls
-                tot_loss = step_loss + self.gradMatching_penalty*meta_ce_loss + self.penalty*ssl_loss.mean()
-                tot_loss.backward()
-                self.meta_loss_optimizer.step()
-                self.optimizer.zero_grad()
-                
-                total_losses += tot_loss
-                steps +=1
-                # use colored to print three losses
-
-            train_metric = self.evaluate_model(dataloader,'train',is_dataloader=True)
-            valid_metric = self.evaluate_model(valid_dloader,'valid',is_dataloader=True)
-            test_metric = self.evaluate_model(test_dloader,'test',is_dataloader=True)
-            self.valid_metric_list.append((valid_metric,test_metric))
-            self.train_metrics.append(train_metric)
-            self.val_metrics.append(valid_metric)
-            self.test_metrics.append(test_metric)
-            
-            # self.evaluate_gradient(valid_dloader,'valid',is_dataloader=True)
-            print (colored(f'Epoch {e} Total Loss: {total_losses/steps}, \n Train metric score:{train_metric}; Valid metric score:{valid_metric}; Test metric: {test_metric}','blue','on_yellow'))
-            
-            # train_metric_score = self.evaluate_model(dataloader,'train',is_dataloader=True)
-            # val_metric_score = self.evaluate_model(valid_dloader,'valid',is_dataloader=True)
-            # self.train_metrics.append(train_metric_score)
-            # self.val_metrics.append(val_metric_score)
+        raise ValueError('Not implemented error!')
     
     
     def fit_meta_loss_step(self,data,phase='train'):
         # update meta loss mlp \phi.
         ## get ssl loss
-        data = data.to(self.device)
-        y = data.y
-        if phase=='train':
-            self.train()
-        else:
-            self.eval()
-        
-        self.meta_loss_optimizer.zero_grad()
-        assert self.edge_gnn!='none', "edge_gnn shouldn't be none!"
-
-        edge_weights1,_ = self.learn_edge_weight(data)
-        edge_weights2,_ = self.learn_edge_weight(data)
-
-        self.encoder_model.learnable_edge_weight1 = edge_weights1
-        self.encoder_model.learnable_edge_weight2 = edge_weights2
-
-        _, _, _, _, g1, g2 = self.encoder_model(data.x, data.edge_index, data.batch,edge_attr=data.edge_attr if self.useAutoAug else None)
-        g1, g2 = [self.ssl_header(g) for g in [g1, g2]]
-        ssl_loss = self.contrast_model_non_agg(g1=g1, g2=g2, batch=data.batch).view(-1,1)
-        # update meta loss mlp
-        # meta_loss = self.penalty*torch.mean(self.meta_loss_mlp(g1+g2))
-        # meta_loss = self.meta_loss1(self.meta_loss_head(torch.cat([ssl_loss,g1*0.],dim=1)))
-        meta_loss = self.meta_loss1(self.meta_loss_head(ssl_loss))
-        mean_meta_loss = self.penalty*meta_loss.mean()
-        if phase=='valid':
-            return meta_loss.mean()
-        if  torch.isnan(mean_meta_loss):
-            return -1.
-        # perform gd update on meta loss
-        mean_meta_loss.backward()
-        self.meta_loss_optimizer.step()
-        self.meta_loss_optimizer.zero_grad()
-        
-        # forward meta loss again
-        edge_weights1,edge_tv_distance1 = self.learn_edge_weight(data)
-        edge_weights2,edge_tv_distance2 = self.learn_edge_weight(data)
-        
-        self.encoder_model.learnable_edge_weight1 = edge_weights1
-        self.encoder_model.learnable_edge_weight2 = edge_weights2
-
-        _, _, _, _, g1, g2 = self.encoder_model(data.x, data.edge_index, data.batch,edge_attr=data.edge_attr if self.useAutoAug else None)
-        g1, g2 = [self.ssl_header(g) for g in [g1, g2]]
-        ssl_loss = self.contrast_model_non_agg(g1=g1, g2=g2, batch=data.batch).view(-1,1)
-        
-        # meta_logits = self.meta_loss2(self.meta_loss_head(torch.cat([ssl_loss,g1*0.],dim=1)))
-        meta_logits = self.meta_loss2(self.meta_loss_head(ssl_loss))
-        meta_loss_ce = F.cross_entropy(meta_logits, y)
-        if self.debug:
-            print (f'meta train phase: ssl_loss {ssl_loss.mean().item()}, meta learned loss: {mean_meta_loss.item()/self.penalty}, meta ce loss: {meta_loss_ce.item()}')
-
-        # standard cross-entropy ERM
-        edge_weight,edge_tv_distance3 = self.learn_edge_weight(data)
-        if self.featureMasking:
-            g = self.gnn(data.x*torch.sigmoid(self.featsMask), data.edge_index,edge_attr = data.edge_attr, batch=data.batch,edge_weight=edge_weight, return_both_rep=False)
-        else:
-            g = self.gnn(data.x, data.edge_index,edge_attr = data.edge_attr, edge_weight=edge_weight, batch=data.batch, return_both_rep=False)
-        logits = self.cls_header(g)
-        loss = F.cross_entropy(logits, y)
-        tot_edges = data.edge_index.shape[1]
-        edge_reg = self.edge_loss(edge_weight.sum()/tot_edges)
-        step_loss = loss + self.edge_penalty*edge_reg + self.edge_uniform_penalty*(edge_tv_distance1+edge_tv_distance2+edge_tv_distance3)/3.0
-        if step_loss>1e4 or torch.isnan(step_loss):
-            return -1.
-        # print (f'cls loss:{loss.item()}, ssl_loss:{ssl_loss.mean().item()}, meta_ce_loss:{meta_loss_ce.item()}, mean_meta_loss:{mean_meta_loss.item()}')
-        return step_loss,meta_loss_ce,ssl_loss
+        raise ValueError('Not implemented error!')
 
 
     def valid_meta_loss(self,dataloader):
