@@ -306,66 +306,6 @@ class Model(BaseModel):
         if test_dloader is not None:
             test_metric_score= self.evaluate_model(test_dloader,'test',is_dataloader=True)
         #? put aside
-        
-        
-
-
-
-    # def test_time_adapt(self,dataloader,valid_dloader,test_dloader,test_dloader_single_data,epochs=50,test_time_steps = 10,option='ssl'): # can be ssl or meta_loss
-    #     self.to(self.device)
-    #     test_perf_tracker = []
-    #     test_perf_score = []
-    #     labels = []
-    #     batch_size = test_dloader_single_data.batch_size
-    #     if option=='ssl':
-    #         self.fit(dataloader,valid_dloader,test_dloader,epochs=epochs)
-    #     elif option=='meta_loss':
-    #         self.fit_meta_loss(dataloader,valid_dloader,test_dloader,epochs=epochs)
-    #     else:
-    #         assert "wrong option for test-time adaptation!"
-        
-    #     self.load_state_dict(self.best_states)
-    #     metric_score = self.evaluate_model(test_dloader,'test',is_dataloader=True)   # for step 0 
-    #     test_perf_score.append(metric_score)
-    #     self.optimizer.zero_grad()
-    #     for batch in tqdm(test_dloader_single_data):
-    #         batch = batch.to(self.device)
-    #         labels.append(batch.y.view(-1,))
-    #         test_perf_tracker_step = []
-    #         for i in range(test_time_steps):
-    #             loss_val = self.train_ssl_one_step(batch)
-    #             loss_val.backward()
-    #             self.edge_gnn_optimizer.step()
-    #             self.optimizer.zero_grad()
-    #             # get the edge weight
-    #             min_loss = 1e5
-    #             best_edge_weight = None
-    #             for _ in range(10):
-    #                 loss_,w_ = self.calc_best_loss_(batch,option=option)
-    #                 if loss_<min_loss:
-    #                     min_loss = loss_
-    #                     best_edge_weight = w_    
-                
-    #             logits = self.evaluate_model(batch,'test',is_dataloader=False,best_edge_weight=best_edge_weight)
-    #             test_perf_tracker_step.append(logits.view(batch_size,1,-1))
-    #             self.load_state_dict(self.best_states)
-
-    #         test_perf_tracker_step = torch.cat(test_perf_tracker_step,dim=1) # shape:(B,20,C)
-    #         # test_perf_tracker_step = test_perf_tracker_step.unsqueeze(0) # shape:(B,20,C)
-    #         test_perf_tracker.append(test_perf_tracker_step)
-    #     test_perf_tracker = torch.cat(test_perf_tracker,dim=0) # shape:(N,20,C)
-    #     labels = torch.cat(labels,dim=0)
-    #     for j in range(test_time_steps):
-    #         logits = test_perf_tracker[:,j,:]
-    #         if self.metric_name=='acc':
-    #             metric_score = self.metric_func(logits, labels).item()
-    #         if self.metric_name=='auc':
-    #             metric_score = self.metric_func(logits[:,1], labels).item()
-    #         test_perf_score.append(metric_score)
-    #     if self.debug:
-    #         print ("test perf tracker:")
-    #         print (test_perf_score)
-    #     return test_perf_score # (test_time_steps,)
     
 
 
