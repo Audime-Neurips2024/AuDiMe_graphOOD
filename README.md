@@ -18,7 +18,7 @@ The datasets used in our experiments are also provided at [this url](https://dri
 
 ### DrugOOD
 
-- For `ood-baselines/` and `AuDiMe/`, to use DrugOOD datasets, curate the datasets according to [DrugOOD Benchmark repo](https://github.com/tencent-ailab/DrugOOD) based on commit `eeb00b8da7646e1947ca7aec93041052a48bd45e`, After curating the datasets, put the corresponding json files under `XXX/data/DrugOOD/`.
+- For `ood-baselines/` and `AuDiMe/`, to use DrugOOD datasets, curate the datasets according to [DrugOOD Benchmark repo](https://github.com/tencent-ailab/DrugOOD) based on commit `eeb00b8da7646e1947ca7aec93041052a48bd45e`, After curating the datasets, put the corresponding json files under `XXX/data/DrugOOD/`. The processed json files are also provided at [this url](https://drive.google.com/file/d/1Vx0am8jkl5hOt2RlO6DtEq9IvuayKX_0/view?usp=sharing). You can unzip it and put it under `XXX/data/`, e.g., `AuDiMe/data/`.
 - For `iMoLD/`, the JSON files can be obtained [here](https://drive.google.com/drive/folders/19EAVkhJg0AgMx7X-bXGOhD4ENLfxJMWC), then Extract the downloaded file and save the contents in `iMoLD/drugood-data-chembl30/`.
 
 
