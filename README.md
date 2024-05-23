@@ -13,6 +13,8 @@ python gen_struc.py
 
 The data will be saved to `XXX/data/`, e.g., `ood-baselines/data/`. 
 
+The datasets used in our experiments are also provided at [this url](https://drive.google.com/file/d/1Vx0am8jkl5hOt2RlO6DtEq9IvuayKX_0/view?usp=sharing).
+
 
 ### DrugOOD
 
